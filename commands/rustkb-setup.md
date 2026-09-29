@@ -9,7 +9,7 @@ Install and initialise the rustkb MCP server for this plugin.
 2. Check prerequisites: `cargo --version` (Rust ≥ 1.88). If missing, tell me to install Rust via
    https://rustup.rs and stop.
 3. Install: `cargo install --path "<plugin root>/crates/rustkb" --locked`
-   (or without the plugin checkout: `cargo install --git https://github.com/JSBtechnologies/rustkb rustkb --locked`)
+   (or from crates.io: `cargo install rustkb --locked`)
    (add `--features semantic` if I want semantic search; it downloads a ~30 MB embedding model on
    first use).
 4. Verify `rustkb --version` works from a new shell (the binary lands in `~/.cargo/bin`; tell me to

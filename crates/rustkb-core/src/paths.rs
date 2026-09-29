@@ -6,18 +6,22 @@ use crate::{Error, Result};
 ///
 /// * `root` — the knowledge root (the plugin/repo checkout containing `skills/`).
 ///   Resolved from `RUSTKB_ROOT`, then `CLAUDE_PLUGIN_ROOT`, then by walking up
-///   from the current directory, then from the build-time source location.
+///   from the current directory, then from the build-time source location. When none
+///   exists (e.g. installed from crates.io), rustkb manages its own copy of the curated
+///   corpus under `<data>/corpus`, downloaded from the upstream repository.
 /// * `data` — writable state: downloads, normalised docs, the search index.
 ///   Resolved from `RUSTKB_HOME`, else the platform data directory.
 #[derive(Debug, Clone)]
 pub struct Paths {
     pub root: PathBuf,
     pub data: PathBuf,
+    /// `root` is rustkb's own downloaded corpus (safe to replace on refresh), not a
+    /// user's checkout.
+    pub managed_root: bool,
 }
 
 impl Paths {
     pub fn discover() -> Result<Self> {
-        let root = find_root().ok_or(Error::RootNotFound)?;
         let data = match env_path("RUSTKB_HOME").or_else(|| env_path("CLAUDE_PLUGIN_DATA")) {
             Some(home) => home,
             None => directories::ProjectDirs::from("dev", "rustkb", "rustkb")
@@ -25,14 +29,31 @@ impl Paths {
                 .data_local_dir()
                 .to_owned(),
         };
-        Ok(Self { root, data })
+        Ok(match find_root() {
+            Some(root) => Self {
+                root,
+                data,
+                managed_root: false,
+            },
+            None => Self {
+                root: data.join("corpus"),
+                data,
+                managed_root: true,
+            },
+        })
     }
 
     pub fn new(root: impl Into<PathBuf>, data: impl Into<PathBuf>) -> Self {
         Self {
             root: root.into(),
             data: data.into(),
+            managed_root: false,
         }
+    }
+
+    /// Whether `root` currently holds a usable corpus.
+    pub fn has_corpus(&self) -> bool {
+        is_root(&self.root)
     }
 
     pub fn skills_dir(&self) -> PathBuf {

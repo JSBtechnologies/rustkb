@@ -5,6 +5,11 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Internal ingesters for rustkb (docs.rs rustdoc JSON, clippy lints, OSV advisories, release notes, crates.io). No stability guarantees; use the `rustkb` binary."
+keywords = ["rustkb"]
+categories = ["development-tools"]
+authors.workspace = true
+homepage.workspace = true
 
 [dependencies]
 anyhow = "1.0.104"

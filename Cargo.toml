@@ -8,11 +8,13 @@ edition = "2024"
 rust-version = "1.88"
 license = "MIT"
 repository = "https://github.com/JSBtechnologies/rustkb"
+homepage = "https://github.com/JSBtechnologies/rustkb"
+authors = ["Jeffrie Budde"]
 
 [workspace.dependencies]
-rustkb-core = { path = "crates/rustkb-core" }
-rustkb-index = { path = "crates/rustkb-index" }
-rustkb-ingest = { path = "crates/rustkb-ingest" }
+rustkb-core = { path = "crates/rustkb-core", version = "0.1.0" }
+rustkb-index = { path = "crates/rustkb-index", version = "0.1.0" }
+rustkb-ingest = { path = "crates/rustkb-ingest", version = "0.1.0" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -5,6 +5,11 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Internal hybrid search index for rustkb (tantivy BM25 + optional model2vec embeddings). No stability guarantees; use the `rustkb` binary."
+keywords = ["rustkb", "search"]
+categories = ["development-tools"]
+authors.workspace = true
+homepage.workspace = true
 
 [dependencies]
 model2vec-rs = { version = "0.3.0", optional = true, default-features = false, features = ["hf-hub", "fancy-regex"] }

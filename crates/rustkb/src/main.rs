@@ -30,7 +30,7 @@ enum Command {
     Serve,
     /// Download/refresh upstream sources, then rebuild the index.
     Ingest {
-        /// Only these sources: clippy, advisories, releases, rustdoc.
+        /// Only these sources: corpus, clippy, advisories, releases, rustdoc.
         #[arg(long, value_delimiter = ',')]
         only: Vec<String>,
         /// Also ingest rustdoc for `crate` or `crate@version` (repeatable).
@@ -131,6 +131,7 @@ fn paths(cli: &Cli) -> Result<Paths> {
     let mut paths = Paths::discover()?;
     if let Some(root) = &cli.root {
         paths.root.clone_from(root);
+        paths.managed_root = false;
     }
     if let Some(home) = &cli.home {
         paths.data.clone_from(home);

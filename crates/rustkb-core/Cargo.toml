@@ -5,6 +5,11 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Internal data model for rustkb (docs, frontmatter, crate catalog, paths). No stability guarantees; use the `rustkb` binary."
+keywords = ["rustkb"]
+categories = ["development-tools"]
+authors.workspace = true
+homepage.workspace = true
 
 [dependencies]
 directories = "6.0.0"

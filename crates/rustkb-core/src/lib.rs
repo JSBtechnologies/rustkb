@@ -34,10 +34,6 @@ pub enum Error {
         #[source]
         source: toml::de::Error,
     },
-    #[error(
-        "could not locate the rustkb knowledge root (set RUSTKB_ROOT to the directory containing `skills/`)"
-    )]
-    RootNotFound,
     #[error("could not determine a data directory (set RUSTKB_HOME)")]
     NoDataDir,
 }

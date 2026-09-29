@@ -6,6 +6,7 @@
 
 pub mod advisories;
 pub mod clippy;
+pub mod corpus;
 pub mod cratesio;
 pub mod curated;
 pub mod http;

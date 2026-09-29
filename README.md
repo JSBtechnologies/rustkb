@@ -72,8 +72,8 @@ claude plugin marketplace add JSBtechnologies/rustkb
 claude plugin install rustkb@rustkb
 
 # 2. Install the binary (the skills work without it; the MCP tools need it)
-cargo install --git https://github.com/JSBtechnologies/rustkb rustkb --locked   # add --features semantic for embeddings
-rustkb --root <plugin root> ingest                                            # first data pull (a few minutes)
+cargo install rustkb --locked          # add --features semantic for embeddings
+rustkb ingest                          # first data pull (a few minutes)
 ```
 
 Or run `/rustkb-setup` inside Claude Code, which does step 2 for you. The plugin registers the
@@ -91,13 +91,24 @@ Plugin contents:
   - `/rustkb-update` refreshes the data and fixes drift.
   - `/rustkb-setup` installs the binary.
 
+### Standalone (any agent, no plugin)
+
+```sh
+cargo install rustkb --locked
+rustkb ingest
+```
+
+Without a local checkout, rustkb downloads the curated corpus (`skills/`) from this repository
+into its data directory on first use, and `rustkb ingest` refreshes it. Knowledge updates
+therefore reach you without a new binary release.
+
 ### Other agents (MCP)
 
 ```jsonc
 // Cursor: .cursor/mcp.json · Claude Desktop: claude_desktop_config.json · most MCP clients use this shape
 {
   "mcpServers": {
-    "rustkb": { "command": "rustkb", "args": ["serve"], "env": { "RUSTKB_ROOT": "/path/to/rustkb" } }
+    "rustkb": { "command": "rustkb", "args": ["serve"] }
   }
 }
 ```
@@ -107,7 +118,6 @@ Plugin contents:
 [mcp_servers.rustkb]
 command = "rustkb"
 args = ["serve"]
-env = { RUSTKB_ROOT = "/path/to/rustkb" }
 ```
 
 The server's `instructions` teach the agent the workflow: search guidance first, verify crates
@@ -135,7 +145,8 @@ Environment variables:
 
 | Variable | Purpose |
 |---|---|
-| `RUSTKB_ROOT` | Knowledge root. Otherwise auto-discovered. |
+| `RUSTKB_ROOT` | Knowledge root (a checkout containing `skills/`). Otherwise auto-discovered, or a managed copy is downloaded. |
+| `RUSTKB_CORPUS_URL` | Zip archive to download the managed corpus from. Defaults to this repo's `main`. |
 | `RUSTKB_HOME` | Data directory. Defaults to the platform data dir. |
 | `RUSTKB_LOG` | Tracing filter. |
 | `RUSTKB_EMBED_MODEL` | Any model2vec model. Defaults to `minishlab/potion-base-8M`. |

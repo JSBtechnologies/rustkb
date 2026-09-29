@@ -58,6 +58,7 @@ impl Kb {
     /// Open the knowledge base, (re)building the index when it is missing or the curated
     /// corpus changed since it was built. Never touches the network.
     pub(crate) fn open(paths: Paths) -> Result<Self> {
+        ensure_corpus(&paths)?;
         let http = Http::new(paths.cache_dir())?;
         let store = Store::new(&paths);
         let catalog = Catalog::load(&paths.catalog_file())?;
@@ -113,6 +114,7 @@ impl Kb {
 
     /// Rebuild the whole index (and vectors) from curated files + stored docs.
     pub(crate) fn rebuild(paths: &Paths) -> Result<BTreeMap<String, u64>> {
+        ensure_corpus(paths)?;
         let store = Store::new(paths);
         let docs = all_docs(paths, &store)?;
         let mut counts = BTreeMap::new();
@@ -156,6 +158,13 @@ impl Kb {
             Err(e) => log.push(format!("{name}: FAILED — {e:#}")),
         };
 
+        // Only rustkb's own downloaded corpus is refreshed — never a user's checkout.
+        if paths.managed_root && want("corpus") {
+            run("corpus", &mut || {
+                let n = rustkb_ingest::corpus::fetch(&http, &paths.root)?;
+                Ok(format!("{n} files from {}", rustkb_ingest::corpus::url()))
+            });
+        }
         if want("clippy") {
             run("clippy", &mut || {
                 let docs = clippy::fetch(&http, ttl)?;
@@ -944,6 +953,18 @@ impl Kb {
         }
         Ok(out)
     }
+}
+
+/// Without a local checkout, download the curated corpus on first use.
+fn ensure_corpus(paths: &Paths) -> Result<()> {
+    if paths.managed_root && !paths.has_corpus() {
+        let http = Http::new(paths.cache_dir())?;
+        let n = rustkb_ingest::corpus::fetch(&http, &paths.root).context(
+            "no local rustkb corpus and the download failed              (set RUSTKB_ROOT to a checkout of the rustkb repository)",
+        )?;
+        tracing::info!(files = n, root = %paths.root.display(), "installed curated corpus");
+    }
+    Ok(())
 }
 
 fn all_docs(paths: &Paths, store: &Store) -> Result<Vec<Doc>> {

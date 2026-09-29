@@ -5,6 +5,12 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Versioned Rust knowledge base for AI coding agents: an MCP server and CLI with curated best-practice guidance, docs.rs API docs, clippy lints, RustSec advisories and drift detection."
+keywords = ["rust", "mcp", "knowledge-base", "ai-agents", "documentation"]
+categories = ["command-line-utilities", "development-tools"]
+authors.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
 
 [dependencies]
 anyhow = "1.0.104"
