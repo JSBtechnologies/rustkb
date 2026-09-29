@@ -712,27 +712,23 @@ impl Kb {
         lockfile: Option<&str>,
     ) -> Result<String> {
         let mut packages: Vec<(String, String)> = Vec::new();
+        let mut scope = String::new();
         if let Some(lock) = lockfile {
-            let text = std::fs::read_to_string(lock).with_context(|| format!("reading {lock}"))?;
-            let parsed: toml::Value = toml::from_str(&text).context("parsing Cargo.lock")?;
-            for p in parsed
-                .get("package")
-                .and_then(|p| p.as_array())
-                .into_iter()
-                .flatten()
-            {
-                let from_registry = p
-                    .get("source")
-                    .and_then(|s| s.as_str())
-                    .is_some_and(|s| s.starts_with("registry+") || s.starts_with("sparse+"));
-                if let (true, Some(n), Some(v)) = (
-                    from_registry,
-                    p.get("name").and_then(|n| n.as_str()),
-                    p.get("version").and_then(|v| v.as_str()),
-                ) {
-                    packages.push((n.to_owned(), v.to_owned()));
-                }
+            let path = resolve_lockfile(lock)?;
+            let text = std::fs::read_to_string(&path)
+                .with_context(|| format!("reading {}", path.display()))?;
+            let summary =
+                parse_lockfile(&text).with_context(|| format!("parsing {}", path.display()))?;
+            scope = summary.scope_note();
+            if summary.registry.is_empty() && krate.is_none() {
+                return Ok(format!(
+                    "✅ Nothing to audit in `{}`: it has no crates.io dependencies.
+
+{scope}",
+                    path.display()
+                ));
             }
+            packages = summary.registry;
         }
         match (krate, version) {
             (Some(k), Some(v)) => packages.push((k.to_owned(), v.to_owned())),
@@ -767,11 +763,17 @@ impl Kb {
                 affected.push((k.clone(), v.clone(), hits.into_iter().cloned().collect()));
             }
         }
-        Ok(render_advisories(
-            &affected,
-            packages.len(),
-            "RustSec/OSV mirror (≤1 day old)",
-        ))
+        let mut out =
+            render_advisories(&affected, packages.len(), "RustSec/OSV mirror (≤1 day old)");
+        if !scope.is_empty() {
+            let _ = write!(
+                out,
+                "
+
+{scope}"
+            );
+        }
+        Ok(out)
     }
 
     pub(crate) fn explain_lint(&self, name: &str) -> Result<String> {
@@ -960,7 +962,7 @@ fn ensure_corpus(paths: &Paths) -> Result<()> {
     if paths.managed_root && !paths.has_corpus() {
         let http = Http::new(paths.cache_dir())?;
         let n = rustkb_ingest::corpus::fetch(&http, &paths.root).context(
-            "no local rustkb corpus and the download failed              (set RUSTKB_ROOT to a checkout of the rustkb repository)",
+            "no local rustkb corpus and the download failed (set RUSTKB_ROOT to a checkout of the rustkb repository)",
         )?;
         tracing::info!(files = n, root = %paths.root.display(), "installed curated corpus");
     }
@@ -1152,6 +1154,86 @@ fn render_advisories(
     out
 }
 
+/// Packages of a Cargo.lock, by where they come from.
+#[derive(Debug, Default)]
+struct LockSummary {
+    /// `(name, version)` from crates.io or another registry — what advisories cover.
+    registry: Vec<(String, String)>,
+    /// Local/path and workspace packages (no `source`): your own code.
+    path: Vec<String>,
+    /// `(name, source)` of git dependencies: not covered by `RustSec` advisories.
+    git: Vec<(String, String)>,
+}
+
+impl LockSummary {
+    fn scope_note(&self) -> String {
+        let mut note = format!(
+            "Scope: {} registry package(s) checked; {} local/path package(s) skipped (your own code)",
+            self.registry.len(),
+            self.path.len()
+        );
+        if self.git.is_empty() {
+            note.push('.');
+        } else {
+            let names: Vec<&str> = self.git.iter().map(|(n, _)| n.as_str()).collect();
+            let _ = write!(
+                note,
+                "; {} git dependenc{} not covered by advisories — review manually: {}.",
+                self.git.len(),
+                if self.git.len() == 1 { "y" } else { "ies" },
+                names.join(", ")
+            );
+        }
+        note
+    }
+}
+
+fn parse_lockfile(text: &str) -> Result<LockSummary> {
+    let parsed: toml::Value = toml::from_str(text)?;
+    let mut summary = LockSummary::default();
+    for p in parsed
+        .get("package")
+        .and_then(|p| p.as_array())
+        .into_iter()
+        .flatten()
+    {
+        let (Some(name), Some(version)) = (
+            p.get("name").and_then(|n| n.as_str()),
+            p.get("version").and_then(|v| v.as_str()),
+        ) else {
+            continue;
+        };
+        match p.get("source").and_then(|s| s.as_str()) {
+            None => summary.path.push(name.to_owned()),
+            Some(src) if src.starts_with("git+") => {
+                summary.git.push((name.to_owned(), src.to_owned()));
+            }
+            Some(_) => summary.registry.push((name.to_owned(), version.to_owned())),
+        }
+    }
+    Ok(summary)
+}
+
+/// Accept a Cargo.lock path or a project directory containing one.
+fn resolve_lockfile(input: &str) -> Result<std::path::PathBuf> {
+    let path = std::path::Path::new(input);
+    let path = if path.is_dir() {
+        path.join("Cargo.lock")
+    } else {
+        path.to_owned()
+    };
+    if !path.is_file() {
+        let cwd = std::env::current_dir()
+            .map(|d| d.display().to_string())
+            .unwrap_or_default();
+        bail!(
+            "no Cargo.lock at `{}` (relative paths resolve from `{cwd}`; pass an absolute path, or run `cargo generate-lockfile` first)",
+            path.display()
+        );
+    }
+    Ok(path)
+}
+
 /// Whether `query` names `krate` (all of its `-`/`_`-separated parts appear as words).
 fn names_crate(query: &str, krate: &str) -> bool {
     let words: Vec<String> = query
@@ -1207,4 +1289,68 @@ fn highlights(body: &str, max_lines: usize) -> String {
         }
     }
     out.join("\n")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const LOCK: &str = r#"
+version = 3
+
+[[package]]
+name = "app"
+version = "0.1.0"
+dependencies = ["serde", "local-lib", "forked"]
+
+[[package]]
+name = "local-lib"
+version = "0.1.0"
+
+[[package]]
+name = "serde"
+version = "1.0.229"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "sparse-dep"
+version = "0.2.0"
+source = "sparse+https://index.crates.io/"
+
+[[package]]
+name = "forked"
+version = "0.3.0"
+source = "git+https://github.com/example/forked?branch=main#abc123"
+"#;
+
+    #[test]
+    fn classifies_lockfile_packages() {
+        let s = parse_lockfile(LOCK).expect("parses");
+        assert_eq!(
+            s.registry,
+            [
+                ("serde".into(), "1.0.229".into()),
+                ("sparse-dep".into(), "0.2.0".into())
+            ]
+        );
+        assert_eq!(s.path, ["app", "local-lib"]);
+        assert_eq!(s.git.len(), 1);
+        let note = s.scope_note();
+        assert!(note.contains("2 registry package(s) checked"), "{note}");
+        assert!(note.contains("1 git dependency not covered"), "{note}");
+    }
+
+    #[test]
+    fn path_only_workspace_has_nothing_to_audit() {
+        let s = parse_lockfile(
+            "version = 3
+[[package]]
+name = \"a\"
+version = \"0.1.0\"
+",
+        )
+        .expect("parses");
+        assert!(s.registry.is_empty());
+        assert_eq!(s.path, ["a"]);
+    }
 }

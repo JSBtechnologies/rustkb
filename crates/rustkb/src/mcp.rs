@@ -87,7 +87,8 @@ pub(crate) struct AdvisoryArgs {
     pub krate: Option<String>,
     #[serde(default)]
     pub version: Option<String>,
-    /// Path to a Cargo.lock to audit every registry dependency.
+    /// Absolute path to a Cargo.lock (or a project directory containing one) to audit every
+    /// crates.io dependency. Path and git dependencies are reported but not checked.
     #[serde(default)]
     pub lockfile: Option<String>,
 }

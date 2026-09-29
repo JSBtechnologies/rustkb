@@ -3,7 +3,7 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT"
@@ -12,9 +12,9 @@ homepage = "https://github.com/JSBtechnologies/rustkb"
 authors = ["Jeffrie Budde"]
 
 [workspace.dependencies]
-rustkb-core = { path = "crates/rustkb-core", version = "0.1.0" }
-rustkb-index = { path = "crates/rustkb-index", version = "0.1.0" }
-rustkb-ingest = { path = "crates/rustkb-ingest", version = "0.1.0" }
+rustkb-core = { path = "crates/rustkb-core", version = "0.1.1" }
+rustkb-index = { path = "crates/rustkb-index", version = "0.1.1" }
+rustkb-ingest = { path = "crates/rustkb-ingest", version = "0.1.1" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
