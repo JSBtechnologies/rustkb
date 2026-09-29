@@ -1,0 +1,2789 @@
+# rustkb crate catalog: machine-read by the rustkb MCP server (recommend_crates, crate_info),
+# drift detection (rustkb stale) and docs ingestion (track_docs = true).
+# Schema: docs/AUTHORING.md. version = major.minor of crates.io max_stable_version, verified 2026-09-29.
+#
+# tier:  default     = pick this unless you have a stated reason not to
+#        recommended = good, maintained choice for the stated use_for
+#        situational = only for the specific use_for case
+#        avoid       = deprecated / unmaintained / superseded by std; see alternatives
+#
+# Allowed category values:
+#   async-runtime    executors/runtimes
+#   async-util       futures, cancellation, retries
+#   web              server frameworks & middleware
+#   http             HTTP types, low-level HTTP, URLs, WebSockets
+#   rpc              gRPC
+#   serialization    serde and data formats
+#   http-client      HTTP/SMTP clients
+#   database         SQL/NoSQL clients, ORMs, embedded stores
+#   cache            in-memory caches
+#   cli              argument parsing & terminal UX
+#   tui              terminal UIs
+#   error            error types & reporting
+#   observability    logs, traces, metrics
+#   config           configuration loading
+#   time             dates, times, time zones
+#   text             regex, unicode, markdown, templates
+#   parsing          parser combinators/generators, lexers
+#   concurrency      threads, parallelism, locks, lazy statics
+#   data-structures  collections, ids, randomness, derive helpers
+#   testing          test & bench libraries
+#   tls              TLS stacks & certificates
+#   crypto           cryptographic primitives & secrets
+#   gui              desktop GUI, graphics, games
+#   wasm             WebAssembly (browser & runtimes)
+#   embedded         no_std / microcontrollers
+#   data             dataframes, arrays, math, images
+#   ml               machine learning & AI protocols
+#   ffi              foreign-function interfaces & bindings
+#   fs               filesystem walking/watching
+#   compression      compression & archives
+#   os               OS APIs
+#   messaging        message brokers
+#   cloud            cloud SDKs & object storage
+#   macros           proc-macro tooling & macro helpers
+#   tool             cargo subcommands / dev tools (install, do not depend on)
+
+# ======================================================================
+# async-runtime: executors/runtimes
+# ======================================================================
+
+[[crate]]
+name = "tokio"
+category = "async-runtime"
+tier = "default"
+version = "1.53"
+summary = "Multi-threaded async runtime with IO, timers, sync primitives; the ecosystem default."
+use_for = "Any async application: servers, clients, CLIs doing concurrent IO."
+avoid_when = "Pure CPU-bound work (use rayon) or embedded/no_std (use embassy)."
+alternatives = ["smol", "embassy-executor"]
+replaces = ["async-std", "tokio-core"]
+track_docs = true
+
+[[crate]]
+name = "smol"
+category = "async-runtime"
+tier = "situational"
+version = "2.0"
+summary = "Small, simple async runtime built from async-io/async-executor/blocking."
+use_for = "Small tools or libraries wanting a minimal runtime; replacement for discontinued async-std."
+avoid_when = "You need the tokio ecosystem (axum, tonic, sqlx, reqwest all assume tokio)."
+alternatives = ["tokio"]
+replaces = ["async-std"]
+track_docs = false
+
+[[crate]]
+name = "async-std"
+category = "async-runtime"
+tier = "avoid"
+version = "1.13"
+summary = "Discontinued async runtime (RUSTSEC-2025-0052); authors point to smol."
+use_for = "Nothing new."
+avoid_when = "Always: tokio, or smol for minimal runtimes."
+alternatives = ["tokio", "smol"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# async-util: futures, cancellation, retries
+# ======================================================================
+
+[[crate]]
+name = "tokio-util"
+category = "async-util"
+tier = "recommended"
+version = "0.7"
+summary = "Tokio companions: codecs/Framed, CancellationToken, TaskTracker, ReaderStream, compat."
+use_for = "Framing byte streams, graceful shutdown with CancellationToken, bridging AsyncRead and Stream."
+avoid_when = ""
+alternatives = []
+replaces = ["tokio-codec"]
+track_docs = true
+
+[[crate]]
+name = "futures"
+category = "async-util"
+tier = "recommended"
+version = "0.3"
+summary = "Core future/stream traits, combinators, join/select macros, executor-agnostic channels."
+use_for = "Stream combinators, join_all/FuturesUnordered, executor-agnostic library code."
+avoid_when = "Libraries that only need a few traits: depend on futures-util/futures-core with default-features = false."
+alternatives = ["futures-util", "futures-lite"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "async-trait"
+category = "async-util"
+tier = "situational"
+version = "0.1"
+summary = "Macro that boxes async trait methods so traits stay dyn-compatible."
+use_for = "Traits with async methods that must be used as dyn Trait (still not dyn-compatible natively on 1.96)."
+avoid_when = "Static dispatch only: native async fn in traits is stable since 1.75."
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "backon"
+category = "async-util"
+tier = "default"
+version = "1.6"
+summary = "Retry with backoff for sync and async functions."
+use_for = "Retrying flaky operations."
+avoid_when = ""
+alternatives = []
+replaces = ["backoff"]
+track_docs = false
+
+[[crate]]
+name = "backoff"
+category = "async-util"
+tier = "avoid"
+version = "0.4"
+summary = "Unmaintained (RUSTSEC-2025-0012)."
+use_for = "Nothing."
+avoid_when = "Always: backon."
+alternatives = ["backon"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# web: server frameworks & middleware
+# ======================================================================
+
+[[crate]]
+name = "axum"
+category = "web"
+tier = "default"
+version = "0.8"
+summary = "Web framework (HTTP server, REST/JSON APIs) on hyper + tower from the tokio team; the default for new Rust backends."
+use_for = "HTTP APIs and web services; default choice for new Rust backends."
+avoid_when = "You need a batteries-included framework with its own actor/runtime model."
+alternatives = ["actix-web", "poem", "rocket", "salvo"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "axum-extra"
+category = "web"
+tier = "recommended"
+version = "0.12"
+summary = "Extra extractors/responses for axum: typed headers, cookies, typed routing, query arrays."
+use_for = "Cookies, TypedHeader, Query with sequences, protobuf, form helpers."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "tower"
+category = "web"
+tier = "recommended"
+version = "0.5"
+summary = "Service/Layer abstraction and generic middleware (timeouts, retries, rate limits, load balancing)."
+use_for = "Writing reusable middleware; ServiceBuilder stacks; client-side retries and timeouts."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "tower-http"
+category = "web"
+tier = "default"
+version = "0.7"
+summary = "HTTP-specific tower middleware: tracing, CORS, compression, timeouts, static files, request IDs."
+use_for = "Every axum/hyper/tonic service: TraceLayer, CorsLayer, CompressionLayer, TimeoutLayer, ServeDir."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "actix-web"
+category = "web"
+tier = "recommended"
+version = "4.15"
+summary = "Mature, fast, batteries-included web framework on its own actor-based runtime (actix-rt)."
+use_for = "Existing actix codebases; teams that like its extractor/middleware model."
+avoid_when = "New projects wanting tower middleware interop; prefer axum."
+alternatives = ["axum"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rocket"
+category = "web"
+tier = "situational"
+version = "0.5"
+summary = "Macro-heavy, batteries-included web framework on tokio; last release 0.5.1 (2024-05)."
+use_for = "Existing Rocket apps."
+avoid_when = "New projects: releases are infrequent; axum has the momentum."
+alternatives = ["axum"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "warp"
+category = "web"
+tier = "situational"
+version = "0.4"
+summary = "Filter-combinator web framework on hyper; still maintained (0.4) but the ecosystem's momentum is with axum."
+use_for = "Existing warp services."
+avoid_when = "New services: complex filter types hurt compile errors and times; use axum."
+alternatives = ["axum"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "utoipa"
+category = "web"
+tier = "recommended"
+version = "6.0"
+summary = "Compile-time OpenAPI document generation via derive macros."
+use_for = "Generating OpenAPI specs for axum/actix services."
+avoid_when = ""
+alternatives = ["aide", "poem"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# http: HTTP types, low-level HTTP, URLs, WebSockets
+# ======================================================================
+
+[[crate]]
+name = "hyper"
+category = "http"
+tier = "situational"
+version = "1.11"
+summary = "Low-level HTTP/1 and HTTP/2 client/server implementation."
+use_for = "Building frameworks, proxies, or when you need exact control of connections."
+avoid_when = "Application code: use axum (server) or reqwest (client) on top of it."
+alternatives = ["axum", "reqwest"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "http"
+category = "http"
+tier = "recommended"
+version = "1.5"
+summary = "Shared HTTP types (Request, Response, HeaderMap, StatusCode, Uri) used across the ecosystem."
+use_for = "Type vocabulary in libraries that should not depend on a framework."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "tokio-tungstenite"
+category = "http"
+tier = "recommended"
+version = "0.30"
+summary = "Async WebSocket client/server on tokio (tungstenite underneath)."
+use_for = "WebSocket clients; servers outside axum (axum has ws built in via the ws feature)."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "url"
+category = "http"
+tier = "recommended"
+version = "2.5"
+summary = "WHATWG URL parsing and manipulation."
+use_for = "Parsing, joining and validating URLs."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+# ======================================================================
+# rpc: gRPC
+# ======================================================================
+
+[[crate]]
+name = "tonic"
+category = "rpc"
+tier = "default"
+version = "0.14"
+summary = "gRPC over HTTP/2 built on hyper/tower; 0.14 moved prost codegen to tonic-prost / tonic-prost-build."
+use_for = "gRPC clients and servers."
+avoid_when = "Browser clients (need grpc-web layer) or JSON APIs."
+alternatives = []
+replaces = []
+track_docs = true
+
+# ======================================================================
+# serialization: serde and data formats
+# ======================================================================
+
+[[crate]]
+name = "prost"
+category = "serialization"
+tier = "default"
+version = "0.14"
+summary = "Protocol Buffers implementation generating idiomatic Rust types."
+use_for = "Protobuf encoding with tonic or standalone."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "serde"
+category = "serialization"
+tier = "default"
+version = "1.0"
+summary = "Generic serialization framework with derive macros; the universal data-model layer."
+use_for = "Any (de)serialization; enable the derive feature."
+avoid_when = ""
+alternatives = []
+replaces = ["rustc-serialize"]
+track_docs = true
+
+[[crate]]
+name = "serde_json"
+category = "serialization"
+tier = "default"
+version = "1.0"
+summary = "JSON for serde: typed (de)serialization plus the dynamic Value type."
+use_for = "JSON APIs, config, persistence."
+avoid_when = "Extreme throughput needs (consider sonic-rs or simd-json after profiling)."
+alternatives = ["sonic-rs", "simd-json"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "serde_with"
+category = "serialization"
+tier = "recommended"
+version = "3.24"
+summary = "Custom serde helpers: DisplayFromStr, durations, base64, skip-if-default, as-map."
+use_for = "Replacing hand-written serialize_with modules."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "toml"
+category = "serialization"
+tier = "default"
+version = "1.1"
+summary = "TOML (de)serialization for serde; 1.x implements TOML 1.1."
+use_for = "Reading/writing TOML config."
+avoid_when = "Editing TOML while preserving formatting/comments (use toml_edit)."
+alternatives = ["toml_edit"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "serde-saphyr"
+category = "serialization"
+tier = "default"
+version = "1.3"
+summary = "Pure-Rust, panic-free YAML (de)serializer for serde built on saphyr-parser; MSRV 1.89."
+use_for = "YAML in new projects; replacement for deprecated serde_yaml."
+avoid_when = "You need a drop-in API-compatible swap for serde_yaml (use serde_norway)."
+alternatives = ["serde_norway", "serde_yaml_ng"]
+replaces = ["serde_yaml", "serde_yml"]
+track_docs = true
+
+[[crate]]
+name = "serde_norway"
+category = "serialization"
+tier = "situational"
+version = "0.9"
+summary = "Fork of serde_yaml (same API) on unsafe-libyaml-norway; releases have been sparse since 2024-12."
+use_for = "Mechanical migration off serde_yaml with minimal code changes."
+avoid_when = ""
+alternatives = ["serde-saphyr"]
+replaces = ["serde_yaml", "serde_yml"]
+track_docs = false
+
+[[crate]]
+name = "postcard"
+category = "serialization"
+tier = "default"
+version = "1.1"
+summary = "Compact, stable, no_std-friendly binary serde format with a documented wire spec."
+use_for = "Binary serialization, embedded messaging, bincode replacement."
+avoid_when = ""
+alternatives = ["wincode", "bitcode", "rkyv"]
+replaces = ["bincode"]
+track_docs = true
+
+[[crate]]
+name = "wincode"
+category = "serialization"
+tier = "situational"
+version = "0.6"
+summary = "bincode-compatible-wire-format serializer suggested by RustSec as a bincode successor."
+use_for = "Keeping bincode 1.x wire compatibility after bincode was discontinued."
+avoid_when = ""
+alternatives = ["postcard"]
+replaces = ["bincode"]
+track_docs = false
+
+[[crate]]
+name = "rkyv"
+category = "serialization"
+tier = "situational"
+version = "0.8"
+summary = "Zero-copy deserialization framework."
+use_for = "Memory-mapped or very large read-mostly data where deserialize cost dominates."
+avoid_when = "Ordinary interchange: its archived types complicate APIs."
+alternatives = ["postcard"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "csv"
+category = "serialization"
+tier = "default"
+version = "1.4"
+summary = "Fast, flexible CSV reader/writer with serde support."
+use_for = "Reading/writing CSV."
+avoid_when = "Columnar analytics on large files (polars)."
+alternatives = ["polars"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "quick-xml"
+category = "serialization"
+tier = "default"
+version = "0.42"
+summary = "High-performance XML reader/writer with optional serde support."
+use_for = "Parsing or writing XML."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "base64"
+category = "serialization"
+tier = "default"
+version = "0.23"
+summary = "Base64 encode/decode with configurable engines."
+use_for = "Base64 in any variant; use base64::prelude::BASE64_STANDARD."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "schemars"
+category = "serialization"
+tier = "recommended"
+version = "1.2"
+summary = "Generate JSON Schema from Rust types via derive."
+use_for = "Publishing schemas for configs/APIs; LLM tool schemas."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "serde_yaml"
+category = "serialization"
+tier = "avoid"
+version = "0.9"
+summary = "Deprecated and archived by its author (last release 0.9.34)."
+use_for = "Nothing new."
+avoid_when = "Always: serde-saphyr (new) or serde_norway (drop-in)."
+alternatives = ["serde-saphyr", "serde_norway"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "serde_yml"
+category = "serialization"
+tier = "avoid"
+version = "0.0.13"
+summary = "serde_yaml fork flagged unsound and unmaintained (RUSTSEC-2025-0068); repository archived."
+use_for = "Nothing."
+avoid_when = "Always."
+alternatives = ["serde-saphyr", "serde_norway"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "bincode"
+category = "serialization"
+tier = "avoid"
+version = "3.0"
+summary = "Discontinued (RUSTSEC-2025-0141); 3.0.0 is a tombstone release that only emits a compile error."
+use_for = "Existing data files needing the exact format."
+avoid_when = "New code: postcard, wincode (bincode-compatible), bitcode, or rkyv."
+alternatives = ["postcard", "wincode", "bitcode", "rkyv"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "serde_cbor"
+category = "serialization"
+tier = "avoid"
+version = "0.11"
+summary = "Unmaintained CBOR crate (RUSTSEC-2021-0127)."
+use_for = "Nothing."
+avoid_when = "Always: ciborium."
+alternatives = ["ciborium"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# http-client: HTTP/SMTP clients
+# ======================================================================
+
+[[crate]]
+name = "reqwest"
+category = "http-client"
+tier = "default"
+version = "0.13"
+summary = "High-level async (and blocking) HTTP client; rustls is the default TLS since 0.13."
+use_for = "Calling HTTP APIs, JSON requests, file downloads."
+avoid_when = "Tiny sync CLIs where tokio is unwanted (use ureq)."
+alternatives = ["ureq", "hyper"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "ureq"
+category = "http-client"
+tier = "recommended"
+version = "3.4"
+summary = "Simple blocking HTTP client with no async runtime."
+use_for = "CLIs, build scripts and tools that make a few sync requests."
+avoid_when = "Async applications (use reqwest)."
+alternatives = ["reqwest"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "lettre"
+category = "http-client"
+tier = "default"
+version = "0.11"
+summary = "Email (SMTP) client."
+use_for = "Sending email."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "surf"
+category = "http-client"
+tier = "avoid"
+version = "2.3"
+summary = "Unmaintained HTTP client from the async-std ecosystem (RUSTSEC-2025-0036)."
+use_for = "Nothing."
+avoid_when = "Always: reqwest or ureq."
+alternatives = ["reqwest", "ureq"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# database: SQL/NoSQL clients, ORMs, embedded stores
+# ======================================================================
+
+[[crate]]
+name = "sqlx"
+category = "database"
+tier = "default"
+version = "0.9"
+summary = "Async SQL toolkit (Postgres, MySQL, SQLite) with compile-time checked queries and migrations; not an ORM."
+use_for = "Async services that want raw SQL with type checking."
+avoid_when = "You want a full ORM with query builder (sea-orm, diesel)."
+alternatives = ["diesel", "sea-orm", "tokio-postgres"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "diesel"
+category = "database"
+tier = "recommended"
+version = "2.3"
+summary = "Mature, compile-time-safe ORM and query builder (sync; async via diesel-async)."
+use_for = "Strong typed query DSL; sync apps or with diesel-async."
+avoid_when = ""
+alternatives = ["sqlx", "sea-orm"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "sea-orm"
+category = "database"
+tier = "recommended"
+version = "2.0"
+summary = "Async, dynamic ORM built on sqlx with entities, relations and migrations."
+use_for = "CRUD-heavy async apps wanting ActiveRecord-style ORM."
+avoid_when = "Performance-critical hand-tuned SQL (sqlx)."
+alternatives = ["sqlx", "diesel"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rusqlite"
+category = "database"
+tier = "default"
+version = "0.40"
+summary = "Ergonomic sync SQLite bindings; bundled feature compiles SQLite in."
+use_for = "Embedded SQLite in CLIs, desktop apps, tests."
+avoid_when = "Async servers sharing a pool (sqlx sqlite, or spawn_blocking)."
+alternatives = ["sqlx"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "redis"
+category = "database"
+tier = "default"
+version = "1.7"
+summary = "Redis client (sync and async, cluster, pipelines) now maintained under redis-rs org."
+use_for = "Caching, queues, pub/sub via Redis/Valkey."
+avoid_when = ""
+alternatives = ["fred"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "mongodb"
+category = "database"
+tier = "default"
+version = "3.9"
+summary = "Official MongoDB driver."
+use_for = "MongoDB access."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "redb"
+category = "database"
+tier = "recommended"
+version = "4.3"
+summary = "Pure-Rust embedded ACID key-value store."
+use_for = "Embedded persistent KV without C dependencies."
+avoid_when = ""
+alternatives = ["rusqlite", "heed"]
+replaces = ["sled"]
+track_docs = false
+
+[[crate]]
+name = "sled"
+category = "database"
+tier = "avoid"
+version = "0.34"
+summary = "Embedded database stuck in long-running beta; last stable release is years old."
+use_for = "Existing deployments only."
+avoid_when = "New code: use redb, heed (LMDB) or rusqlite."
+alternatives = ["redb", "rusqlite"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# cache: in-memory caches
+# ======================================================================
+
+[[crate]]
+name = "moka"
+category = "cache"
+tier = "default"
+version = "0.12"
+summary = "Concurrent in-memory cache (sync and async) with TTL/TTI and size-based eviction."
+use_for = "Memoizing expensive lookups, API response caching."
+avoid_when = "Tiny single-threaded LRU needs (lru)."
+alternatives = ["lru", "cached"]
+replaces = []
+track_docs = true
+
+# ======================================================================
+# cli: argument parsing & terminal UX
+# ======================================================================
+
+[[crate]]
+name = "clap"
+category = "cli"
+tier = "default"
+version = "4.6"
+summary = "Command-line argument parser; use the derive API."
+use_for = "Any CLI with flags/subcommands."
+avoid_when = "Tiny internal tools where compile time dominates (lexopt, argh)."
+alternatives = ["argh", "lexopt"]
+replaces = ["structopt"]
+track_docs = true
+
+[[crate]]
+name = "dialoguer"
+category = "cli"
+tier = "recommended"
+version = "0.12"
+summary = "Interactive prompts: confirm, input, select, password."
+use_for = "Interactive CLIs."
+avoid_when = ""
+alternatives = ["inquire"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "indicatif"
+category = "cli"
+tier = "default"
+version = "0.18"
+summary = "Progress bars and spinners."
+use_for = "Long-running CLI operations."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "owo-colors"
+category = "cli"
+tier = "recommended"
+version = "4.4"
+summary = "Zero-allocation terminal colors."
+use_for = "Coloring CLI output."
+avoid_when = ""
+alternatives = ["anstream"]
+replaces = ["colored", "ansi_term"]
+track_docs = false
+
+[[crate]]
+name = "directories"
+category = "cli"
+tier = "recommended"
+version = "6.0"
+summary = "Platform-correct config/cache/data dirs via ProjectDirs; development moved to Codeberg (GitHub repo archived)."
+use_for = "Where to store app config/cache."
+avoid_when = ""
+alternatives = ["dirs"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "structopt"
+category = "cli"
+tier = "avoid"
+version = "0.3"
+summary = "Derive CLI parser merged into clap 3+; in maintenance mode (RUSTSEC-2022-0104)."
+use_for = "Nothing new."
+avoid_when = "Always: use clap with the derive feature."
+alternatives = ["clap"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "atty"
+category = "cli"
+tier = "avoid"
+version = "0.2"
+summary = "Unmaintained with unsoundness advisory (RUSTSEC-2024-0375)."
+use_for = "Nothing."
+avoid_when = "Always: std::io::IsTerminal (1.70)."
+alternatives = ["std::io::IsTerminal"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "is-terminal"
+category = "cli"
+tier = "avoid"
+version = "0.4"
+summary = "Polyfill for std::io::IsTerminal, stable since Rust 1.70."
+use_for = "MSRV < 1.70 only."
+avoid_when = "Otherwise: use std::io::IsTerminal."
+alternatives = ["std::io::IsTerminal"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# tui: terminal UIs
+# ======================================================================
+
+[[crate]]
+name = "ratatui"
+category = "tui"
+tier = "default"
+version = "0.30"
+summary = "Terminal UI library (immediate-mode widgets, layouts); community successor of tui-rs."
+use_for = "Full-screen terminal UIs and dashboards."
+avoid_when = ""
+alternatives = ["cursive"]
+replaces = ["tui"]
+track_docs = true
+
+[[crate]]
+name = "crossterm"
+category = "tui"
+tier = "default"
+version = "0.29"
+summary = "Cross-platform terminal manipulation (raw mode, events, colors); ratatui's default backend."
+use_for = "Low-level terminal control, key events."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "tui"
+category = "tui"
+tier = "avoid"
+version = "0.19"
+summary = "Unmaintained predecessor of ratatui (RUSTSEC-2023-0049)."
+use_for = "Nothing."
+avoid_when = "Always: ratatui."
+alternatives = ["ratatui"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# error: error types & reporting
+# ======================================================================
+
+[[crate]]
+name = "thiserror"
+category = "error"
+tier = "default"
+version = "2.0"
+summary = "Derive std::error::Error for your own error enums/structs."
+use_for = "Library error types and typed domain errors in apps."
+avoid_when = ""
+alternatives = ["snafu"]
+replaces = ["failure", "error-chain", "quick-error"]
+track_docs = true
+
+[[crate]]
+name = "anyhow"
+category = "error"
+tier = "default"
+version = "1.0"
+summary = "Type-erased application error with context and backtraces."
+use_for = "Binaries and application edges (main, handlers, scripts)."
+avoid_when = "Public library APIs (use thiserror types)."
+alternatives = ["eyre", "color-eyre"]
+replaces = ["failure", "error-chain"]
+track_docs = true
+
+[[crate]]
+name = "color-eyre"
+category = "error"
+tier = "situational"
+version = "0.6"
+summary = "eyre report handler with colored, span-traced error reports."
+use_for = "CLIs wanting pretty error reports with tracing spans."
+avoid_when = ""
+alternatives = ["anyhow", "miette"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "miette"
+category = "error"
+tier = "situational"
+version = "7.6"
+summary = "Diagnostic error reporting with source snippets and labels."
+use_for = "Compilers, linters, config validators showing spans in source."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "failure"
+category = "error"
+tier = "avoid"
+version = "0.1"
+summary = "Deprecated error library (RUSTSEC-2020-0036)."
+use_for = "Nothing."
+avoid_when = "Always: thiserror for types, anyhow for apps."
+alternatives = ["thiserror", "anyhow"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "error-chain"
+category = "error"
+tier = "avoid"
+version = "0.12"
+summary = "Deprecated macro-based error chaining; unmaintained."
+use_for = "Nothing."
+avoid_when = "Always."
+alternatives = ["thiserror", "anyhow"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# observability: logs, traces, metrics
+# ======================================================================
+
+[[crate]]
+name = "tracing"
+category = "observability"
+tier = "default"
+version = "0.1"
+summary = "Structured logging and tracing: span-aware instrumentation facade for logs, traces and events."
+use_for = "All new instrumentation (libraries and apps)."
+avoid_when = ""
+alternatives = ["log"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "tracing-subscriber"
+category = "observability"
+tier = "default"
+version = "0.3"
+summary = "Logging/tracing output for binaries: fmt and JSON log formatting, EnvFilter (RUST_LOG), layered registry."
+use_for = "Configuring tracing output in binaries."
+avoid_when = "Libraries (never install a subscriber in a library)."
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "log"
+category = "observability"
+tier = "situational"
+version = "0.4"
+summary = "Legacy logging facade still used by many libraries."
+use_for = "Libraries that must stay tracing-free; tracing-subscriber bridges it."
+avoid_when = "New apps: use tracing."
+alternatives = ["tracing"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "opentelemetry"
+category = "observability"
+tier = "recommended"
+version = "0.33"
+summary = "OpenTelemetry API for traces, metrics, logs."
+use_for = "Exporting telemetry to OTel collectors/vendors."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "opentelemetry_sdk"
+category = "observability"
+tier = "recommended"
+version = "0.33"
+summary = "OpenTelemetry SDK (providers, processors, samplers)."
+use_for = "Setting up OTel pipelines in binaries."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "opentelemetry-otlp"
+category = "observability"
+tier = "recommended"
+version = "0.33"
+summary = "OTLP exporter (gRPC/HTTP) for OpenTelemetry."
+use_for = "Shipping traces/metrics/logs to a collector."
+avoid_when = ""
+alternatives = []
+replaces = ["opentelemetry-jaeger"]
+track_docs = false
+
+[[crate]]
+name = "tracing-opentelemetry"
+category = "observability"
+tier = "recommended"
+version = "0.34"
+summary = "Bridge tracing spans into OpenTelemetry traces."
+use_for = "Using tracing macros while exporting OTel traces."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "metrics"
+category = "observability"
+tier = "recommended"
+version = "0.24"
+summary = "Lightweight metrics facade (counters, gauges, histograms)."
+use_for = "Application metrics with pluggable exporters."
+avoid_when = ""
+alternatives = ["prometheus-client", "opentelemetry"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "metrics-exporter-prometheus"
+category = "observability"
+tier = "recommended"
+version = "0.18"
+summary = "Prometheus exporter/recorder for the metrics facade."
+use_for = "Exposing /metrics for Prometheus."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# config: configuration loading
+# ======================================================================
+
+[[crate]]
+name = "figment"
+category = "config"
+tier = "recommended"
+version = "0.10"
+summary = "Layered configuration (files, env, defaults) into serde structs with value provenance; releases infrequent (0.10.19, 2024-05) but repo active."
+use_for = "Apps merging TOML/JSON/env config."
+avoid_when = ""
+alternatives = ["config"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "config"
+category = "config"
+tier = "recommended"
+version = "0.15"
+summary = "Layered configuration from files (TOML/YAML/JSON/INI) and environment; actively released."
+use_for = "Apps merging config files with env overrides."
+avoid_when = ""
+alternatives = ["figment"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "dotenvy"
+category = "config"
+tier = "recommended"
+version = "0.15"
+summary = "Load .env files into the environment; maintained dotenv fork (0.15.7 is still current)."
+use_for = "Local development env files."
+avoid_when = "Production secrets management."
+alternatives = []
+replaces = ["dotenv"]
+track_docs = false
+
+[[crate]]
+name = "dotenv"
+category = "config"
+tier = "avoid"
+version = "0.15"
+summary = "Unmaintained (RUSTSEC-2021-0141)."
+use_for = "Nothing."
+avoid_when = "Always: dotenvy."
+alternatives = ["dotenvy"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# time: dates, times, time zones
+# ======================================================================
+
+[[crate]]
+name = "jiff"
+category = "time"
+tier = "default"
+version = "0.2"
+summary = "Date and time library (datetime, timezone, DST-safe arithmetic) with first-class IANA time zones and calendar spans."
+use_for = "New code handling civil time, time zones, durations for humans."
+avoid_when = "Libraries whose public APIs must interoperate with chrono types."
+alternatives = ["chrono", "time"]
+replaces = ["chrono-tz"]
+track_docs = true
+
+[[crate]]
+name = "chrono"
+category = "time"
+tier = "recommended"
+version = "0.4"
+summary = "Most widely used date and time library (datetime; timezone via chrono-tz); huge interop surface (serde, sqlx, diesel)."
+use_for = "Interop with crates exposing chrono types; existing codebases."
+avoid_when = "Time-zone-aware arithmetic in new code (jiff handles DST correctly by design)."
+alternatives = ["jiff", "time"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "time"
+category = "time"
+tier = "situational"
+version = "0.3"
+summary = "Date and time library with const format descriptions; UTC/fixed offsets only, no IANA timezone database."
+use_for = "UTC/offset timestamps, formatting/parsing with format_description!."
+avoid_when = "Named time zones."
+alternatives = ["jiff"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "instant"
+category = "time"
+tier = "avoid"
+version = "0.1"
+summary = "Unmaintained (RUSTSEC-2024-0384)."
+use_for = "Nothing."
+avoid_when = "Always: web-time for wasm, std::time elsewhere."
+alternatives = ["web-time"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "chrono-tz"
+category = "time"
+tier = "situational"
+version = "0.10"
+summary = "IANA timezone database for chrono, compiled into the binary; tzdb updates require new crate releases."
+use_for = "chrono codebases that need named time zones."
+avoid_when = "New time-zone-aware code: jiff handles zones and DST arithmetic natively."
+alternatives = ["jiff"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# text: regex, unicode, markdown, templates
+# ======================================================================
+
+[[crate]]
+name = "regex"
+category = "text"
+tier = "default"
+version = "1.13"
+summary = "Linear-time regular expressions (no backreferences/lookaround)."
+use_for = "Pattern matching over untrusted input."
+avoid_when = ""
+alternatives = ["fancy-regex"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "unicode-segmentation"
+category = "text"
+tier = "recommended"
+version = "1.13"
+summary = "Grapheme/word/sentence segmentation (UAX #29)."
+use_for = "Counting user-perceived characters, cursor movement."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "pulldown-cmark"
+category = "text"
+tier = "default"
+version = "0.13"
+summary = "Fast CommonMark pull parser/HTML renderer."
+use_for = "Rendering Markdown."
+avoid_when = "GFM-exact output (comrak)."
+alternatives = ["comrak"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "minijinja"
+category = "text"
+tier = "default"
+version = "2.24"
+summary = "Jinja2-compatible runtime templates with minimal dependencies."
+use_for = "Runtime-loaded templates, prompt templates."
+avoid_when = ""
+alternatives = ["askama", "tera"]
+replaces = ["handlebars"]
+track_docs = false
+
+[[crate]]
+name = "askama"
+category = "text"
+tier = "recommended"
+version = "0.16"
+summary = "Compile-time checked Jinja-like templates."
+use_for = "Server-rendered HTML with type-checked templates."
+avoid_when = ""
+alternatives = ["minijinja"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# parsing: parser combinators/generators, lexers
+# ======================================================================
+
+[[crate]]
+name = "winnow"
+category = "parsing"
+tier = "default"
+version = "1.0"
+summary = "Parser combinators (nom lineage, 1.0 stable) with good errors and performance; used by toml_edit."
+use_for = "Hand-written binary/text parsers."
+avoid_when = ""
+alternatives = ["nom", "chumsky", "pest"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "nom"
+category = "parsing"
+tier = "recommended"
+version = "8.0"
+summary = "Classic parser-combinator library."
+use_for = "Existing nom code; binary protocols."
+avoid_when = ""
+alternatives = ["winnow"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "pest"
+category = "parsing"
+tier = "situational"
+version = "2.9"
+summary = "PEG parser generator from a grammar file."
+use_for = "Grammar-first DSLs."
+avoid_when = "Performance-critical parsing."
+alternatives = ["winnow"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "logos"
+category = "parsing"
+tier = "recommended"
+version = "0.16"
+summary = "Derive-generated fast lexers."
+use_for = "Tokenizing for languages/DSLs."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# concurrency: threads, parallelism, locks, lazy statics
+# ======================================================================
+
+[[crate]]
+name = "rayon"
+category = "concurrency"
+tier = "default"
+version = "1.12"
+summary = "Data-parallelism: par_iter, join, scoped thread pool."
+use_for = "CPU-bound parallel work over collections."
+avoid_when = "IO-bound work (use async) or inside async tasks without spawn_blocking."
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "crossbeam-channel"
+category = "concurrency"
+tier = "situational"
+version = "0.5"
+summary = "MPMC channels with select!."
+use_for = "Sync code needing select over channels."
+avoid_when = "Plain MPSC: std::sync::mpsc is crossbeam-based since 1.67."
+alternatives = ["flume"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "dashmap"
+category = "concurrency"
+tier = "situational"
+version = "6.2"
+summary = "Sharded concurrent HashMap."
+use_for = "Hot, highly contended shared maps."
+avoid_when = "Most apps: Mutex<HashMap> or RwLock is simpler; never hold a DashMap ref across .await."
+alternatives = ["papaya", "scc"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "parking_lot"
+category = "concurrency"
+tier = "situational"
+version = "0.12"
+summary = "Compact, non-poisoning Mutex/RwLock/Condvar with extra features."
+use_for = "Need fair/upgradable locks, lock_api integration, or no poisoning."
+avoid_when = "Default choice: std::sync::Mutex is futex-based since 1.62 and competitive."
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "arc-swap"
+category = "concurrency"
+tier = "recommended"
+version = "1.9"
+summary = "Atomically swappable Arc for read-mostly shared config/state."
+use_for = "Hot-reloadable config, read-mostly snapshots."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "once_cell"
+category = "concurrency"
+tier = "avoid"
+version = "1.21"
+summary = "Lazy statics and once cells (global initialization); upstreamed into std as OnceLock (1.70) and LazyLock (1.80)."
+use_for = "Only for features std still lacks (e.g. race module, get_or_try_init) or MSRV below 1.80."
+avoid_when = "New code: use std::sync::{OnceLock, LazyLock}."
+alternatives = ["std::sync::OnceLock", "std::sync::LazyLock"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "lazy_static"
+category = "concurrency"
+tier = "avoid"
+version = "1.5"
+summary = "Legacy lazy static / global initialization macro; superseded by std::sync::LazyLock (Rust 1.80)."
+use_for = "Nothing new."
+avoid_when = "Always: use std::sync::LazyLock (1.80)."
+alternatives = ["std::sync::LazyLock"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "num_cpus"
+category = "concurrency"
+tier = "avoid"
+version = "1.17"
+summary = "Superseded by std::thread::available_parallelism (1.59)."
+use_for = "Physical-core counts only."
+avoid_when = "Logical parallelism: use std."
+alternatives = ["std::thread::available_parallelism"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# data-structures: collections, ids, randomness, derive helpers
+# ======================================================================
+
+[[crate]]
+name = "indexmap"
+category = "data-structures"
+tier = "default"
+version = "2.14"
+summary = "Hash map/set preserving insertion order."
+use_for = "Deterministic iteration order, JSON with preserved key order."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "smallvec"
+category = "data-structures"
+tier = "situational"
+version = "1.16"
+summary = "Vec with inline storage for small sizes."
+use_for = "Measured hot paths with many tiny vectors."
+avoid_when = "Unmeasured 'optimisation'."
+alternatives = ["arrayvec", "tinyvec"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "bytes"
+category = "data-structures"
+tier = "default"
+version = "1.12"
+summary = "Cheaply cloneable, sliceable byte buffers (Bytes/BytesMut)."
+use_for = "Network protocol buffers in tokio/hyper code."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rustc-hash"
+category = "data-structures"
+tier = "recommended"
+version = "2.1"
+summary = "FxHash: very fast non-DoS-resistant hasher (FxHashMap)."
+use_for = "Integer/short keys from trusted input in hot paths."
+avoid_when = "Untrusted keys (HashDoS)."
+alternatives = ["foldhash", "ahash"]
+replaces = ["fxhash"]
+track_docs = false
+
+[[crate]]
+name = "petgraph"
+category = "data-structures"
+tier = "default"
+version = "0.8"
+summary = "Graph data structures and algorithms."
+use_for = "Graphs, toposort, shortest paths."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "bitflags"
+category = "data-structures"
+tier = "default"
+version = "2.13"
+summary = "Type-safe bit flag sets."
+use_for = "C-style flag fields, FFI flags."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "uuid"
+category = "data-structures"
+tier = "default"
+version = "1.26"
+summary = "UUID generation/parsing (v4, v7...)."
+use_for = "IDs; prefer v7 for DB keys (time-ordered)."
+avoid_when = ""
+alternatives = ["ulid"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rand"
+category = "data-structures"
+tier = "default"
+version = "0.10"
+summary = "Random number generation, distributions, shuffling."
+use_for = "Non-cryptographic and general randomness."
+avoid_when = ""
+alternatives = ["fastrand"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "itertools"
+category = "data-structures"
+tier = "recommended"
+version = "0.15"
+summary = "Extra iterator adaptors (group_by/chunk_by, join, sorted, tuple_windows)."
+use_for = "Iterator-heavy code."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "strum"
+category = "data-structures"
+tier = "recommended"
+version = "0.28"
+summary = "Derives for enums: Display/FromStr/iteration."
+use_for = "Enum <-> string conversion."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "derive_more"
+category = "data-structures"
+tier = "recommended"
+version = "2.1"
+summary = "Derives for From, Display, Deref, arithmetic on newtypes."
+use_for = "Newtype boilerplate."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rust_decimal"
+category = "data-structures"
+tier = "default"
+version = "1.43"
+summary = "96-bit decimal numbers for money and exact decimal arithmetic."
+use_for = "Currency and financial calculations."
+avoid_when = ""
+alternatives = ["bigdecimal"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "fxhash"
+category = "data-structures"
+tier = "avoid"
+version = "0.2"
+summary = "Unmaintained (RUSTSEC-2025-0057)."
+use_for = "Nothing."
+avoid_when = "Always: rustc-hash."
+alternatives = ["rustc-hash"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# testing: test & bench libraries
+# ======================================================================
+
+[[crate]]
+name = "proptest"
+category = "testing"
+tier = "default"
+version = "1.11"
+summary = "Property-based testing with shrinking and strategies."
+use_for = "Invariants, parsers, round-trips."
+avoid_when = ""
+alternatives = ["quickcheck"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "insta"
+category = "testing"
+tier = "default"
+version = "1.48"
+summary = "Snapshot testing (use with cargo-insta)."
+use_for = "Large outputs: serialized structs, CLI output, rendered text."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "mockall"
+category = "testing"
+tier = "recommended"
+version = "0.15"
+summary = "Mock object generation for traits."
+use_for = "Mocking trait dependencies at boundaries."
+avoid_when = "Mocking everything; prefer fakes for simple ports."
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rstest"
+category = "testing"
+tier = "recommended"
+version = "0.27"
+summary = "Fixtures and parameterized tests."
+use_for = "Table-driven tests and shared fixtures."
+avoid_when = ""
+alternatives = ["test-case"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "criterion"
+category = "testing"
+tier = "recommended"
+version = "0.8"
+summary = "Statistics-driven benchmarking harness (now maintained under criterion-rs org)."
+use_for = "Benchmarks with regression comparisons."
+avoid_when = ""
+alternatives = ["divan"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "divan"
+category = "testing"
+tier = "recommended"
+version = "0.1"
+summary = "Simple attribute-based benchmarking with allocation counting."
+use_for = "Quick micro-benchmarks with minimal boilerplate."
+avoid_when = ""
+alternatives = ["criterion"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "wiremock"
+category = "testing"
+tier = "default"
+version = "0.6"
+summary = "HTTP mock server for async tests."
+use_for = "Testing HTTP clients against fake servers."
+avoid_when = ""
+alternatives = ["httpmock", "mockito"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "tempfile"
+category = "testing"
+tier = "default"
+version = "3.27"
+summary = "Secure temporary files and directories."
+use_for = "Tests and scratch files."
+avoid_when = ""
+alternatives = []
+replaces = ["tempdir"]
+track_docs = false
+
+[[crate]]
+name = "assert_cmd"
+category = "testing"
+tier = "default"
+version = "2.2"
+summary = "Run and assert on binaries in integration tests."
+use_for = "CLI integration tests."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "testcontainers"
+category = "testing"
+tier = "recommended"
+version = "0.28"
+summary = "Spin up Docker containers for integration tests."
+use_for = "Tests against real Postgres/Redis/Kafka."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "tempdir"
+category = "testing"
+tier = "avoid"
+version = "0.3"
+summary = "Deprecated (RUSTSEC-2018-0017)."
+use_for = "Nothing."
+avoid_when = "Always: tempfile::TempDir."
+alternatives = ["tempfile"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# tls: TLS stacks & certificates
+# ======================================================================
+
+[[crate]]
+name = "rustls"
+category = "tls"
+tier = "default"
+version = "0.23"
+summary = "Memory-safe TLS 1.2/1.3; default provider aws-lc-rs (ring optional)."
+use_for = "All TLS in new code."
+avoid_when = "Platform-mandated TLS stacks or FIPS setups needing OpenSSL (aws-lc-rs has a FIPS mode)."
+alternatives = ["native-tls", "openssl"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "tokio-rustls"
+category = "tls"
+tier = "recommended"
+version = "0.26"
+summary = "Async TLS streams for tokio using rustls."
+use_for = "TLS on raw TCP in tokio."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rustls-platform-verifier"
+category = "tls"
+tier = "recommended"
+version = "0.7"
+summary = "Verify certificates with the OS trust store/verifier."
+use_for = "Clients that should trust enterprise/OS roots."
+avoid_when = ""
+alternatives = ["webpki-roots"]
+replaces = ["rustls-native-certs"]
+track_docs = false
+
+[[crate]]
+name = "rustls-pki-types"
+category = "tls"
+tier = "recommended"
+version = "1.15"
+summary = "Shared PKI types; includes PEM parsing via PemObject (replaces rustls-pemfile)."
+use_for = "Loading certs/keys from PEM."
+avoid_when = ""
+alternatives = []
+replaces = ["rustls-pemfile"]
+track_docs = false
+
+[[crate]]
+name = "openssl"
+category = "tls"
+tier = "situational"
+version = "0.10"
+summary = "OpenSSL bindings."
+use_for = "Interop needing OpenSSL-specific features/legacy algorithms."
+avoid_when = "Default TLS: requires system libs, complicates cross-compiling and static builds; use rustls."
+alternatives = ["rustls"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "native-tls"
+category = "tls"
+tier = "situational"
+version = "0.2"
+summary = "Platform TLS abstraction (SChannel, Secure Transport, OpenSSL)."
+use_for = "Requirement to use OS TLS stacks."
+avoid_when = ""
+alternatives = ["rustls"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rustls-pemfile"
+category = "tls"
+tier = "avoid"
+version = "2.2"
+summary = "Archived; unmaintained (RUSTSEC-2025-0134)."
+use_for = "Nothing."
+avoid_when = "Always: rustls-pki-types PemObject."
+alternatives = ["rustls-pki-types"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# crypto: cryptographic primitives & secrets
+# ======================================================================
+
+[[crate]]
+name = "aws-lc-rs"
+category = "crypto"
+tier = "recommended"
+version = "1.18"
+summary = "AWS-LC based crypto with ring-compatible API; rustls' default provider; FIPS option."
+use_for = "Primitives behind rustls; FIPS requirements."
+avoid_when = ""
+alternatives = ["ring"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "ring"
+category = "crypto"
+tier = "situational"
+version = "0.17"
+summary = "Crypto primitives (BoringSSL-derived); the 2025 unmaintained advisory was withdrawn and it is maintained with rustls-team help."
+use_for = "Existing ring users; rustls ring provider for simpler cross-compilation (no cmake/NASM)."
+avoid_when = ""
+alternatives = ["aws-lc-rs"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "argon2"
+category = "crypto"
+tier = "default"
+version = "0.6"
+summary = "Argon2 password hashing (RustCrypto)."
+use_for = "Password storage: Argon2id via password-hash API."
+avoid_when = ""
+alternatives = ["bcrypt"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "sha2"
+category = "crypto"
+tier = "default"
+version = "0.11"
+summary = "SHA-2 hashes (RustCrypto)."
+use_for = "SHA-256/512 digests."
+avoid_when = ""
+alternatives = ["blake3"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "aes-gcm"
+category = "crypto"
+tier = "recommended"
+version = "0.11"
+summary = "AES-GCM AEAD (RustCrypto)."
+use_for = "Symmetric authenticated encryption."
+avoid_when = ""
+alternatives = ["chacha20poly1305"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "hmac"
+category = "crypto"
+tier = "default"
+version = "0.13"
+summary = "HMAC (RustCrypto)."
+use_for = "Message authentication, webhook signatures."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "jsonwebtoken"
+category = "crypto"
+tier = "recommended"
+version = "11.1"
+summary = "JWT encode/decode/validate."
+use_for = "JWT auth in services."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "secrecy"
+category = "crypto"
+tier = "recommended"
+version = "0.10"
+summary = "Wrapper types that zeroize and redact secrets in Debug."
+use_for = "Passwords/API keys in config structs."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rust-crypto"
+category = "crypto"
+tier = "avoid"
+version = "0.2"
+summary = "Unmaintained since 2016 with known issues (RUSTSEC-2016-0005)."
+use_for = "Nothing."
+avoid_when = "Always: RustCrypto crates (sha2, aes-gcm...) or aws-lc-rs."
+alternatives = ["sha2", "aes-gcm", "aws-lc-rs"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# gui: desktop GUI, graphics, games
+# ======================================================================
+
+[[crate]]
+name = "egui"
+category = "gui"
+tier = "default"
+version = "0.36"
+summary = "Immediate-mode GUI; with eframe runs native and on the web."
+use_for = "Tools, debug UIs, internal apps."
+avoid_when = "Highly styled consumer UIs."
+alternatives = ["iced", "slint"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "iced"
+category = "gui"
+tier = "recommended"
+version = "0.14"
+summary = "Elm-architecture cross-platform GUI."
+use_for = "Native apps with retained, message-driven UI."
+avoid_when = ""
+alternatives = ["egui", "slint"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "slint"
+category = "gui"
+tier = "recommended"
+version = "1.18"
+summary = "Declarative GUI toolkit with its own markup; desktop and embedded."
+use_for = "Embedded/desktop UIs with designer tooling (GPL/royalty-free/commercial licensing)."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "tauri"
+category = "gui"
+tier = "default"
+version = "2.12"
+summary = "Desktop/mobile apps with a web front end and Rust backend using system webview."
+use_for = "Apps with a web UI."
+avoid_when = ""
+alternatives = ["dioxus"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "dioxus"
+category = "gui"
+tier = "recommended"
+version = "0.7"
+summary = "React-like UI framework for web, desktop, mobile."
+use_for = "Full-stack Rust UI across targets."
+avoid_when = ""
+alternatives = ["leptos"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "wgpu"
+category = "gui"
+tier = "recommended"
+version = "30.0"
+summary = "Safe, portable GPU API (WebGPU) over Vulkan/Metal/DX12/GL."
+use_for = "GPU rendering and compute."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "bevy"
+category = "gui"
+tier = "recommended"
+version = "0.19"
+summary = "Data-driven ECS game engine."
+use_for = "Games, simulations."
+avoid_when = "Stable-API needs: breaking releases every few months."
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# wasm: WebAssembly (browser & runtimes)
+# ======================================================================
+
+[[crate]]
+name = "leptos"
+category = "wasm"
+tier = "recommended"
+version = "0.8"
+summary = "Fine-grained reactive web framework with SSR."
+use_for = "Full-stack Rust web apps."
+avoid_when = ""
+alternatives = ["dioxus", "yew"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "wasm-bindgen"
+category = "wasm"
+tier = "default"
+version = "0.2"
+summary = "Rust <-> JavaScript interop for wasm32 (now maintained under the wasm-bindgen org)."
+use_for = "Browser/Node wasm modules."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "web-sys"
+category = "wasm"
+tier = "default"
+version = "0.3"
+summary = "Raw bindings to Web APIs (enable per-API features)."
+use_for = "DOM, fetch, canvas from wasm."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "wasmtime"
+category = "wasm"
+tier = "default"
+version = "49.0"
+summary = "Fast, secure WebAssembly runtime with component model/WASI."
+use_for = "Embedding wasm plugins/sandboxes."
+avoid_when = ""
+alternatives = ["wasmer"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "web-time"
+category = "wasm"
+tier = "recommended"
+version = "1.1"
+summary = "std::time::Instant/SystemTime drop-in that works on wasm32-unknown-unknown."
+use_for = "Cross-platform time in wasm-targeting code."
+avoid_when = ""
+alternatives = []
+replaces = ["instant"]
+track_docs = false
+
+[[crate]]
+name = "wee_alloc"
+category = "wasm"
+tier = "avoid"
+version = "0.4"
+summary = "Unmaintained wasm allocator with memory leaks (RUSTSEC-2022-0054)."
+use_for = "Nothing."
+avoid_when = "Always: the default allocator is fine for wasm32; wee_alloc leaks memory."
+alternatives = ["default global allocator"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# embedded: no_std / microcontrollers
+# ======================================================================
+
+[[crate]]
+name = "embassy-executor"
+category = "embedded"
+tier = "default"
+version = "0.10"
+summary = "Async executor for embedded (no_std, no alloc) with static task allocation."
+use_for = "Async firmware."
+avoid_when = ""
+alternatives = ["rtic"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "embassy-time"
+category = "embedded"
+tier = "default"
+version = "0.5"
+summary = "Timekeeping, timers and delays for embassy."
+use_for = "Timeouts and delays in async firmware."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "embassy-sync"
+category = "embedded"
+tier = "default"
+version = "0.8"
+summary = "no_std sync primitives (channels, mutex, signal) for async firmware."
+use_for = "Inter-task communication on MCUs."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "embedded-hal"
+category = "embedded"
+tier = "default"
+version = "1.0"
+summary = "Hardware abstraction traits (1.0) for drivers."
+use_for = "Writing portable drivers."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "rtic"
+category = "embedded"
+tier = "recommended"
+version = "2.3"
+summary = "Real-Time Interrupt-driven Concurrency framework for Cortex-M/RISC-V."
+use_for = "Hard real-time, interrupt-priority-driven firmware."
+avoid_when = ""
+alternatives = ["embassy-executor"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "defmt"
+category = "embedded"
+tier = "default"
+version = "1.1"
+summary = "Highly efficient deferred-formatting logging for MCUs."
+use_for = "Logging from firmware over RTT."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "heapless"
+category = "embedded"
+tier = "default"
+version = "0.9"
+summary = "Static-capacity collections (Vec, String, queues) without alloc."
+use_for = "no_std collections."
+avoid_when = ""
+alternatives = ["arrayvec"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "esp-hal"
+category = "embedded"
+tier = "recommended"
+version = "1.2"
+summary = "Official Espressif HAL for ESP32 family (no_std)."
+use_for = "ESP32 firmware."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# data: dataframes, arrays, math, images
+# ======================================================================
+
+[[crate]]
+name = "polars"
+category = "data"
+tier = "default"
+version = "0.55"
+summary = "Fast DataFrame library (lazy + eager) on Arrow memory."
+use_for = "Tabular analytics, ETL."
+avoid_when = ""
+alternatives = ["datafusion", "duckdb"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "arrow"
+category = "data"
+tier = "recommended"
+version = "60.0"
+summary = "Apache Arrow columnar format implementation."
+use_for = "Columnar interchange, building query engines."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "datafusion"
+category = "data"
+tier = "recommended"
+version = "55.1"
+summary = "Extensible SQL query engine on Arrow."
+use_for = "Embedding SQL query execution."
+avoid_when = ""
+alternatives = ["polars", "duckdb"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "ndarray"
+category = "data"
+tier = "default"
+version = "0.17"
+summary = "N-dimensional arrays with numpy-like slicing."
+use_for = "Numeric array computing."
+avoid_when = ""
+alternatives = ["nalgebra", "faer"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "image"
+category = "data"
+tier = "default"
+version = "0.25"
+summary = "Image decoding/encoding and basic processing."
+use_for = "Loading/saving/resizing images."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# ml: machine learning & AI protocols
+# ======================================================================
+
+[[crate]]
+name = "candle-core"
+category = "ml"
+tier = "default"
+version = "0.11"
+summary = "Minimalist ML framework (Hugging Face) with CPU/CUDA/Metal backends."
+use_for = "Inference of transformer models in Rust."
+avoid_when = ""
+alternatives = ["burn", "ort"]
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "burn"
+category = "ml"
+tier = "recommended"
+version = "0.21"
+summary = "Deep learning framework with training and multiple backends."
+use_for = "Training and inference fully in Rust."
+avoid_when = ""
+alternatives = ["candle-core"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "tokenizers"
+category = "ml"
+tier = "recommended"
+version = "0.23"
+summary = "Hugging Face tokenizers."
+use_for = "Tokenization for LLM inference."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rmcp"
+category = "ml"
+tier = "recommended"
+version = "3.5"
+summary = "Official Rust SDK for the Model Context Protocol."
+use_for = "Building MCP servers/clients."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# ffi: foreign-function interfaces & bindings
+# ======================================================================
+
+[[crate]]
+name = "bindgen"
+category = "ffi"
+tier = "default"
+version = "0.73"
+summary = "Generate Rust FFI bindings from C headers (build-dependency)."
+use_for = "Calling C libraries."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cxx"
+category = "ffi"
+tier = "default"
+version = "1.0"
+summary = "Safe C++ <-> Rust interop via a shared bridge definition."
+use_for = "Bidirectional C++ interop."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "pyo3"
+category = "ffi"
+tier = "default"
+version = "0.29"
+summary = "Rust bindings for Python (extension modules and embedding); build with maturin."
+use_for = "Python extensions."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = true
+
+[[crate]]
+name = "napi"
+category = "ffi"
+tier = "default"
+version = "3.13"
+summary = "Node-API bindings for Node.js addons (with napi-derive)."
+use_for = "Node.js native modules."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "uniffi"
+category = "ffi"
+tier = "recommended"
+version = "0.32"
+summary = "Generate Kotlin/Swift/Python bindings from one Rust interface."
+use_for = "Mobile SDKs sharing Rust core."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "libc"
+category = "ffi"
+tier = "default"
+version = "0.2"
+summary = "Raw platform C types and functions."
+use_for = "Low-level syscalls/FFI."
+avoid_when = ""
+alternatives = ["nix", "rustix"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cc"
+category = "ffi"
+tier = "default"
+version = "1.5"
+summary = "Compile C/C++ in build.rs."
+use_for = "Vendored C sources."
+avoid_when = ""
+alternatives = []
+replaces = ["gcc"]
+track_docs = false
+
+# ======================================================================
+# fs: filesystem walking/watching
+# ======================================================================
+
+[[crate]]
+name = "walkdir"
+category = "fs"
+tier = "default"
+version = "2.5"
+summary = "Recursive directory traversal."
+use_for = "Walking directory trees."
+avoid_when = "Respecting .gitignore (use ignore)."
+alternatives = ["ignore"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "ignore"
+category = "fs"
+tier = "recommended"
+version = "0.4"
+summary = "Parallel, gitignore-aware directory walking (from ripgrep)."
+use_for = "Walking source trees like ripgrep."
+avoid_when = ""
+alternatives = ["walkdir"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "notify"
+category = "fs"
+tier = "default"
+version = "8.2"
+summary = "Cross-platform filesystem change notifications."
+use_for = "Watching files."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# compression: compression & archives
+# ======================================================================
+
+[[crate]]
+name = "flate2"
+category = "compression"
+tier = "default"
+version = "1.1"
+summary = "gzip/zlib/deflate (miniz_oxide or zlib-rs backends)."
+use_for = "gzip/deflate streams."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "zstd"
+category = "compression"
+tier = "default"
+version = "0.14"
+summary = "Zstandard compression bindings."
+use_for = "Fast, high-ratio compression."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "zip"
+category = "compression"
+tier = "default"
+version = "8.6"
+summary = "ZIP archive read/write."
+use_for = "ZIP files."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# os: OS APIs
+# ======================================================================
+
+[[crate]]
+name = "nix"
+category = "os"
+tier = "recommended"
+version = "0.31"
+summary = "Safe Unix APIs (signals, processes, sockets)."
+use_for = "Unix system programming."
+avoid_when = ""
+alternatives = ["rustix"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "windows"
+category = "os"
+tier = "default"
+version = "0.62"
+summary = "Official Microsoft Windows API bindings (COM, WinRT)."
+use_for = "Windows APIs."
+avoid_when = "Only raw C-style functions needed (windows-sys compiles faster)."
+alternatives = ["windows-sys"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# messaging: message brokers
+# ======================================================================
+
+[[crate]]
+name = "async-nats"
+category = "messaging"
+tier = "recommended"
+version = "0.50"
+summary = "Official async NATS client (JetStream)."
+use_for = "NATS messaging."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "rdkafka"
+category = "messaging"
+tier = "recommended"
+version = "0.39"
+summary = "Kafka client over librdkafka."
+use_for = "Kafka producers/consumers."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+# ======================================================================
+# cloud: cloud SDKs & object storage
+# ======================================================================
+
+[[crate]]
+name = "aws-sdk-s3"
+category = "cloud"
+tier = "default"
+version = "1.150"
+summary = "Official AWS SDK for S3 (with aws-config)."
+use_for = "S3 access."
+avoid_when = "Provider-agnostic storage (object_store/opendal)."
+alternatives = ["object_store", "opendal"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "object_store"
+category = "cloud"
+tier = "recommended"
+version = "0.14"
+summary = "Uniform object storage API (S3, GCS, Azure, local)."
+use_for = "Multi-cloud blob storage."
+avoid_when = ""
+alternatives = ["opendal"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# macros: proc-macro tooling & macro helpers
+# ======================================================================
+
+[[crate]]
+name = "syn"
+category = "macros"
+tier = "default"
+version = "3.0"
+summary = "Rust syntax parser for proc macros."
+use_for = "Writing proc macros."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "quote"
+category = "macros"
+tier = "default"
+version = "1.0"
+summary = "Quasi-quoting to produce TokenStreams."
+use_for = "Proc macro codegen."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "manyhow"
+category = "macros"
+tier = "situational"
+version = "0.14"
+summary = "Proc-macro error handling helpers."
+use_for = "Emitting multiple errors from proc macros."
+avoid_when = ""
+alternatives = []
+replaces = ["proc-macro-error", "proc-macro-error2"]
+track_docs = false
+
+[[crate]]
+name = "bon"
+category = "macros"
+tier = "recommended"
+version = "3.10"
+summary = "Compile-time checked builders for structs and functions."
+use_for = "Builders with required/optional args."
+avoid_when = ""
+alternatives = ["typed-builder"]
+replaces = ["derive_builder"]
+track_docs = false
+
+[[crate]]
+name = "paste"
+category = "macros"
+tier = "avoid"
+version = "1.0"
+summary = "Archived by its author (RUSTSEC-2024-0436)."
+use_for = "Existing code."
+avoid_when = "New code: pastey (drop-in fork)."
+alternatives = ["pastey"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "proc-macro-error"
+category = "macros"
+tier = "avoid"
+version = "1.0"
+summary = "Unmaintained (RUSTSEC-2024-0370); its fork proc-macro-error2 is unmaintained too."
+use_for = "Nothing."
+avoid_when = "Always: manyhow or syn::Error::to_compile_error."
+alternatives = ["manyhow"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "derivative"
+category = "macros"
+tier = "avoid"
+version = "2.2"
+summary = "Unmaintained (RUSTSEC-2024-0388)."
+use_for = "Nothing."
+avoid_when = "Always: derive-where or educe."
+alternatives = ["derive-where", "educe"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "static_assertions"
+category = "macros"
+tier = "avoid"
+version = "1.1"
+summary = "Superseded by inline const assertions: const { assert!(..) } (1.79)."
+use_for = "Trait-impl assertions (assert_impl_all!)."
+avoid_when = "Value assertions."
+alternatives = ["const { assert!(...) }"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "derive_builder"
+category = "macros"
+tier = "situational"
+version = "0.20"
+summary = "Derive builders whose build() returns Result (runtime-checked required fields)."
+use_for = "Existing code using it."
+avoid_when = "New code: bon gives compile-time-checked builders."
+alternatives = ["bon"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cfg-if"
+category = "macros"
+tier = "avoid"
+version = "1.0"
+summary = "if/else macro for #[cfg]; replaced by std cfg_select! (stable since 1.95); repository archived 2026-09."
+use_for = "Crates with MSRV below 1.95 (it remains a ubiquitous transitive dependency)."
+avoid_when = "New direct uses with MSRV >= 1.95: use core::cfg_select!."
+alternatives = ["cfg_select! (std, 1.95)"]
+replaces = []
+track_docs = false
+
+# ======================================================================
+# tool: cargo subcommands / dev tools (install, do not depend on)
+# ======================================================================
+
+[[crate]]
+name = "cargo-nextest"
+category = "tool"
+tier = "default"
+version = "0.9"
+summary = "Faster, per-test-process test runner with retries and JUnit output."
+use_for = "CI and local test runs (doctests still need cargo test --doc)."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-deny"
+category = "tool"
+tier = "default"
+version = "0.20"
+summary = "Lint dependency graph: advisories, licenses, bans, duplicate versions, sources."
+use_for = "Supply-chain policy in CI."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-machete"
+category = "tool"
+tier = "recommended"
+version = "0.9"
+summary = "Fast detection of unused dependencies (heuristic)."
+use_for = "Pruning Cargo.toml."
+avoid_when = ""
+alternatives = ["cargo-shear", "cargo-udeps"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-semver-checks"
+category = "tool"
+tier = "default"
+version = "0.50"
+summary = "Detect semver violations in library public APIs."
+use_for = "Pre-release checks for published crates."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-llvm-cov"
+category = "tool"
+tier = "default"
+version = "0.9"
+summary = "Source-based code coverage."
+use_for = "Coverage reports in CI."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "bacon"
+category = "tool"
+tier = "recommended"
+version = "3.26"
+summary = "Background compiler/test runner with a TUI."
+use_for = "Continuous check/test while editing."
+avoid_when = ""
+alternatives = []
+replaces = ["cargo-watch"]
+track_docs = false
+
+[[crate]]
+name = "cargo-watch"
+category = "tool"
+tier = "avoid"
+version = "8.5"
+summary = "File-watch cargo runner; repository archived (2025-01), maintainers point to bacon/watchexec."
+use_for = "Existing setups."
+avoid_when = ""
+alternatives = ["bacon", "watchexec-cli"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-msrv"
+category = "tool"
+tier = "recommended"
+version = "0.19"
+summary = "Find/verify minimum supported Rust version."
+use_for = "Setting rust-version."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "cargo-hack"
+category = "tool"
+tier = "recommended"
+version = "0.6"
+summary = "Feature-powerset and MSRV checks."
+use_for = "Checking all feature combinations in CI."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "sqlx-cli"
+category = "tool"
+tier = "default"
+version = "0.9"
+summary = "Migrations and offline query metadata for sqlx."
+use_for = "sqlx projects (cargo sqlx prepare)."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "wasm-pack"
+category = "tool"
+tier = "situational"
+version = "0.15"
+summary = "Build/pack Rust wasm for npm (maintained by drager after rustwasm org sunset)."
+use_for = "Publishing wasm packages to npm."
+avoid_when = ""
+alternatives = ["trunk"]
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "trunk"
+category = "tool"
+tier = "recommended"
+version = "0.21"
+summary = "Build/bundle/serve Rust wasm web apps."
+use_for = "Web front ends in Leptos/Yew/egui."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "maturin"
+category = "tool"
+tier = "default"
+version = "1.15"
+summary = "Build and publish PyO3 Python wheels."
+use_for = "Python extension packaging."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false
+
+[[crate]]
+name = "probe-rs-tools"
+category = "tool"
+tier = "default"
+version = "0.32"
+summary = "Flash and debug embedded targets (probe-rs, cargo-embed)."
+use_for = "Embedded development."
+avoid_when = ""
+alternatives = []
+replaces = []
+track_docs = false

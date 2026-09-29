@@ -1,0 +1,88 @@
+# Keeps the knowledge base honest as Rust and its ecosystem move.
+#
+# Weekly: pull fresh upstream data, detect curated guidance that drifted (new crate majors,
+# unmaintained crates, new Rust releases, stale verification dates) and file/refresh a
+# tracking issue. Optionally, hand the findings to Claude (rustkb-curator agent) to open a PR.
+name: Knowledge refresh
+
+on:
+  schedule:
+    - cron: "17 6 * * 1" # Mondays 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      auto_curate:
+        description: Let Claude open a PR fixing High/Medium findings
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      high: ${{ steps.stale.outputs.high }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --locked -p rustkb
+      - name: Ingest upstream sources
+        run: ./target/release/rustkb --home "$RUNNER_TEMP/kb" ingest --only releases,advisories,clippy
+      - name: Detect drift
+        id: stale
+        run: |
+          set +e
+          ./target/release/rustkb --home "$RUNNER_TEMP/kb" stale --format markdown --strict > drift.md
+          code=$?
+          set -e
+          [ "$code" -eq 0 ] || [ "$code" -eq 2 ] || exit "$code"
+          echo "high=$([ "$code" -eq 2 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          cat drift.md >> "$GITHUB_STEP_SUMMARY"
+      - name: File or update the drift issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Knowledge drift report"
+          body="$(printf 'Automated weekly check (%s). Run `/rustkb-update` in the repo or trigger this workflow with auto_curate.\n\n' "$(date -u +%F)"; cat drift.md)"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if grep -q "No drift detected" drift.md; then
+            [ -n "$existing" ] && gh issue close "$existing" --comment "No drift detected on $(date -u +%F). ✅"
+            exit 0
+          fi
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body "$body"
+          else
+            gh label create kb-drift --color D93F0B --force >/dev/null
+            gh issue create --title "$title" --label kb-drift --body "$body"
+          fi
+
+  curate:
+    # Opt-in: needs an ANTHROPIC_API_KEY secret. Enable per run (input) or always (repo variable).
+    needs: drift
+    if: needs.drift.outputs.high == 'true' && (inputs.auto_curate || vars.RUSTKB_AUTO_CURATE == 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install --path crates/rustkb --locked --root "$HOME/.local" && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          prompt: |
+            You are working in the rustkb repository. Use the rustkb-curator agent (agents/rustkb-curator.md)
+            and follow docs/AUTHORING.md. Run `rustkb ingest --only releases,advisories` then
+            `rustkb stale --format markdown`, fix the High and Medium findings with researched, verified
+            edits, make `rustkb validate` pass, and open a pull request titled
+            "Knowledge refresh <today (UTC)>" whose body lists each change with its evidence links.
+          claude_args: --max-turns 80

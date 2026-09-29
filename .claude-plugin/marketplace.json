@@ -1,0 +1,15 @@
+{
+  "name": "rustkb",
+  "owner": {
+    "name": "Jeffrie Budde",
+    "url": "https://github.com/JSBtechnologies"
+  },
+  "plugins": [
+    {
+      "name": "rustkb",
+      "source": "./",
+      "description": "Curated, versioned Rust knowledge base + MCP server for designing and building best-practice Rust projects.",
+      "version": "0.1.0"
+    }
+  ]
+}

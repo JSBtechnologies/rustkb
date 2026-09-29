@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rustkb --version >/dev/null 2>&1 || echo 'rustkb plugin: the rustkb binary is not on PATH, so its MCP tools (versioned API docs, advisories, lint docs) are unavailable. The Rust skills still work. Run /rustkb-setup to install it.'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

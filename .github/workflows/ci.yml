@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  rust:
+    name: fmt · clippy · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked
+      - run: cargo clippy --workspace --all-targets --locked --features rustkb/semantic
+      - run: cargo test --workspace --locked
+
+  knowledge:
+    name: validate curated knowledge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --locked -p rustkb
+      # Frontmatter, rule ids, catalog schema, SKILL.md headers.
+      - run: ./target/debug/rustkb validate
+      # Index builds and answers from the curated corpus alone (no network).
+      - run: |
+          ./target/debug/rustkb --home "$RUNNER_TEMP/kb" index
+          ./target/debug/rustkb --home "$RUNNER_TEMP/kb" search "error handling in libraries" -n 3
