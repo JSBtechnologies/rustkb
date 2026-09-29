@@ -215,6 +215,9 @@ impl Server {
     }
 }
 
+// rmcp's `#[tool_handler]` expands to async trait fns with no `.await` (flagged since clippy
+// 1.98); `unknown_lints` keeps older toolchains from rejecting the lint name.
+#[allow(unknown_lints, clippy::unused_async_trait_impl)]
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for Server {
     fn get_info(&self) -> ServerConfig {

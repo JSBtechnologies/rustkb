@@ -113,10 +113,8 @@ impl Embeddings {
         let meta: Meta = serde_json::from_slice(&std::fs::read(meta_path)?)?;
         let mut bytes = Vec::new();
         std::fs::File::open(dir.join("matrix.f32"))?.read_to_end(&mut bytes)?;
-        let matrix: Vec<f32> = bytes
-            .chunks_exact(4)
-            .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
-            .collect();
+        let (chunks, _) = bytes.as_chunks::<4>();
+        let matrix: Vec<f32> = chunks.iter().map(|c| f32::from_le_bytes(*c)).collect();
         if matrix.len() != meta.dim * meta.ids.len() {
             return Err(Error::Embedding(
                 "vector matrix size mismatch; rebuild with `rustkb index`".into(),
