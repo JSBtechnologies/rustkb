@@ -217,7 +217,7 @@ name = "rocket"
 category = "web"
 tier = "situational"
 version = "0.5"
-summary = "Macro-heavy, batteries-included web framework on tokio; last release 0.5.1 (2024-05)."
+summary = "Macro-heavy, batteries-included web framework on tokio; last release 0.5.1 (2024-05), repo still sees occasional fixes."
 use_for = "Existing Rocket apps."
 avoid_when = "New projects: releases are infrequent; axum has the momentum."
 alternatives = ["axum"]
@@ -1039,11 +1039,11 @@ track_docs = false
 [[crate]]
 name = "figment"
 category = "config"
-tier = "recommended"
+tier = "situational"
 version = "0.10"
-summary = "Layered configuration (files, env, defaults) into serde structs with value provenance; releases infrequent (0.10.19, 2024-05) but repo active."
-use_for = "Apps merging TOML/JSON/env config."
-avoid_when = ""
+summary = "Layered configuration (files, env, defaults) into serde structs with value provenance; last release 0.10.19 (2024-05), nothing merged upstream since 2024-09."
+use_for = "Existing figment/Rocket apps, or when value provenance in errors is essential."
+avoid_when = "New projects (prefer config), or the yaml feature (pulls in unmaintained serde_yaml)."
 alternatives = ["config"]
 replaces = []
 track_docs = false
@@ -1070,6 +1070,7 @@ use_for = "Local development env files."
 avoid_when = "Production secrets management."
 alternatives = []
 replaces = ["dotenv"]
+notes = "The GitHub README documents the unpublished 0.16 API (EnvLoader); code against crates.io 0.15 (dotenvy::dotenv())."
 track_docs = false
 
 [[crate]]
@@ -2787,3 +2788,14 @@ avoid_when = ""
 alternatives = []
 replaces = []
 track_docs = false
+
+# Curator confirmations that a release-quiet crate is still maintained (or finished), with the
+# evidence checked. `rustkb stale` skips its "no release since" finding for 180 days after the date.
+[maintained_checked]
+smol = "2026-09-30"          # smol-rs commits through 2026-08; 2.0 is stable
+rocket = "2026-09-30"        # upstream fixes through 2025-12; kept situational (new projects: axum)
+figment = "2026-09-30"       # nothing merged since 2024-09 → demoted to situational
+dotenvy = "2026-09-30"       # repo active (2026-08); 0.16 unpublished, 0.15.7 current
+web-time = "2026-09-30"      # finished std::time shim for wasm; last commit 2024-12, 5 open issues
+embedded-hal = "2026-09-30"  # 1.0 trait crate, stable by design; repo active (2026-05)
+walkdir = "2026-09-30"       # finished; BurntSushi repo, CI touched 2024-12

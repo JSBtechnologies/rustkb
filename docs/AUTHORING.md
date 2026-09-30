@@ -102,6 +102,13 @@ replaces = []                      # crates this one supersedes, e.g. ["async-st
 track_docs = true                  # ingest docs.rs API docs for this crate
 ```
 
+When `rustkb stale` reports "no release since …" for a crate that is in fact maintained or
+finished, record the check in the top-level `[maintained_checked]` table at the end of the file
+(`walkdir = "2026-09-30"  # evidence`). The finding stays quiet for 180 days after that date.
+It is a separate table, not an entry field, because older `rustkb` binaries reject unknown entry
+fields but ignore unknown top-level tables. New entry fields break them the same way, so add
+catalog data as new top-level tables.
+
 `tier = "avoid"` entries document crates agents still reach for but shouldn't
 (`lazy_static`, `structopt`, `failure`, `async-std`, `serde_yaml`…) with `replaces`/
 `alternatives` pointing to the modern choice.

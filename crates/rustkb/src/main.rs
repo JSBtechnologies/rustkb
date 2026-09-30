@@ -264,6 +264,13 @@ fn validate(paths: &Paths) -> Result<ExitCode> {
                     ));
                 }
             }
+            for name in cat.maintained_checked.keys() {
+                if cat.get(name).is_none() {
+                    problems.push(format!(
+                        "catalog.toml: [maintained_checked] names `{name}`, which is not a catalog crate"
+                    ));
+                }
+            }
             println!("catalog: {} entries", cat.crates.len());
         }
         Err(e) => problems.push(e.to_string()),

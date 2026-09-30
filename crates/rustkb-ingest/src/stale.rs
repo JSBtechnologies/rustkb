@@ -192,7 +192,14 @@ pub fn check(i: &Inputs<'_>) -> Vec<Finding> {
                 ),
             });
         }
+        // A curator's "still maintained / finished" check holds as long as a verified doc does.
+        let recently_checked = i.catalog.maintained_checked(&c.name).is_some_and(|d| {
+            i.today
+                .since(d)
+                .is_ok_and(|s| i64::from(s.get_days()) <= i.thresholds.max_age_days)
+        });
         if recommended
+            && !recently_checked
             && let Some(updated) = info.last_release.as_deref().and_then(|u| u.get(..10))
             && let Ok(date) = jiff::civil::Date::strptime("%Y-%m-%d", updated)
             && let Ok(span) = i.today.since(date)
@@ -320,6 +327,7 @@ mod tests {
                 notes: String::new(),
                 track_docs: false,
             }],
+            maintained_checked: BTreeMap::new(),
         };
         let crates: BTreeMap<_, _> = [
             (
@@ -375,5 +383,26 @@ mod tests {
             "{msgs:?}"
         );
         assert_eq!(findings[0].severity, Severity::High);
+
+        // A recent maintenance check silences the no-release finding; an old one does not.
+        let flagged = |checked| {
+            let mut catalog = catalog.clone();
+            catalog
+                .maintained_checked
+                .insert("oldcrate".into(), checked);
+            check(&Inputs {
+                report: &report,
+                catalog: &catalog,
+                crates: &crates,
+                advisories: &advisories,
+                latest_rust: Some("1.96.0"),
+                today: jiff::civil::date(2026, 9, 29),
+                thresholds: Thresholds::default(),
+            })
+            .iter()
+            .any(|f| f.message.contains("no release since"))
+        };
+        assert!(!flagged(jiff::civil::date(2026, 9, 1)));
+        assert!(flagged(jiff::civil::date(2025, 9, 1)));
     }
 }

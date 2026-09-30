@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::Path;
 
@@ -59,6 +60,11 @@ pub struct CatalogEntry {
 pub struct Catalog {
     #[serde(rename = "crate", default)]
     pub crates: Vec<CatalogEntry>,
+    /// Crate name → date a curator confirmed the release-quiet crate is still maintained (or
+    /// finished). A top-level table rather than an entry field so older binaries, whose
+    /// `CatalogEntry` denies unknown fields, still load the catalog.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub maintained_checked: BTreeMap<String, jiff::civil::Date>,
 }
 
 impl Catalog {
@@ -86,6 +92,15 @@ impl Catalog {
                 .iter()
                 .any(|r| normalize(r.split_whitespace().next().unwrap_or(r)) == name)
         })
+    }
+
+    /// When a curator last confirmed `name` is still maintained, if ever.
+    pub fn maintained_checked(&self, name: &str) -> Option<jiff::civil::Date> {
+        let name = normalize(name);
+        self.maintained_checked
+            .iter()
+            .find(|(k, _)| normalize(k) == name)
+            .map(|(_, d)| *d)
     }
 
     pub fn tracked(&self) -> impl Iterator<Item = &CatalogEntry> {

@@ -1,7 +1,7 @@
 {
   "name": "rustkb",
   "displayName": "rustkb — Rust knowledge base",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Curated, versioned Rust knowledge for coding agents: idioms, architecture, crate selection and security skills, plus an MCP server with docs.rs API docs, clippy lints, RustSec advisories and release notes that refresh themselves.",
   "author": {
     "name": "Jeffrie Budde",

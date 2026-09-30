@@ -190,14 +190,14 @@ Default: pick the representation deliberately — serde's default "externally ta
 ## SER-06: Configuration loading
 
 Default: a typed `Settings` struct deserialized with serde, loaded by `config`
-(0.15) or `figment` (0.10), validated once at startup, then passed down
+(0.15; `figment` 0.10 in apps that already use it), validated once at startup, then passed down
 explicitly (not read from globals). Config architecture (layering order, secrets, reload)
 lives in `rust-architecture`.
 
 | Need | Crate |
 |---|---|
 | Layer files (TOML/YAML/JSON) + env vars | `config` — actively released |
-| Same, with value provenance in errors ("from env APP_PORT") | `figment` — mature, infrequent releases |
+| Same, with value provenance in errors ("from env APP_PORT") | `figment` — no release since 2024-05 or merges since 2024-09; its `yaml` feature pulls in unmaintained `serde_yaml` |
 | `.env` for local development | `dotenvy` (0.15) — `dotenv` is unmaintained (RUSTSEC-2021-0141) |
 | Env vars only, into a struct | `envy`-style: `config::Environment` or `figment::providers::Env` |
 | CLI flags that override config | `clap` with `env` feature (see `cli-and-tui.md`) |

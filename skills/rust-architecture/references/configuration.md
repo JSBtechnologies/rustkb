@@ -124,7 +124,8 @@ numeric strings deserialise into integer fields). Use `__` so single underscores
 (`max_connections`) survive. Enable only the file formats you use
 (`config = { version = "0.15", default-features = false, features = ["toml"] }`).
 
-Alternatives: `figment` (similar layering, used by Rocket) is fine if already in use. CLIs merge
+Alternatives: `figment` (similar layering, used by Rocket) is fine if already in use, but upstream
+has been quiet since 2024 (last release 0.10.19, 2024-05), so don't start new projects on it. CLIs merge
 clap flags/env with a file by hand (`cli-apps.md` CLI-06). Tiny services can deserialise only from
 environment with the same `config::Environment` source.
 
@@ -200,6 +201,8 @@ let s: Settings = config::Config::builder()
 Use `dotenvy::dotenv().ok()` (ignore a missing file) at the top of `main` in development if the
 team wants it; `.env` is in `.gitignore`, and a committed `.env.example` documents the variables.
 Production gets real environment variables. Never commit `.env` and never require it to exist.
+The dotenvy GitHub README describes the unpublished 0.16 API (`EnvLoader`); crates.io is still
+0.15, so code against `dotenvy::dotenv()`.
 
 ### CFG-08: Libraries take configuration; they never load it
 
